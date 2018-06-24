@@ -86,6 +86,14 @@ class HttpCurl{
 
 
 
+
+    /**
+     * @var int 最后一次 请求的http响应码
+     */
+    private $http_code = 0;
+
+
+
     /**
      * 构造方法
      * @access public
@@ -312,6 +320,22 @@ class HttpCurl{
 
 
 
+    /**
+     * 获取最后一次请求的 http_code
+     * @access public
+     * @author jackhe
+     * @date 2018-06-21
+     * @return int
+     */
+    public function getLastHttpCode(){
+        return $this->http_code;
+    }
+
+
+
+
+
+
 
     /**
      * get 请求方法
@@ -484,19 +508,17 @@ class HttpCurl{
         //执行请求
         $content = curl_exec($this->ch);
         //获取请求 http_code
-        $http_code = curl_getinfo($this->ch,CURLINFO_HTTP_CODE);
+        $this->http_code = curl_getinfo($this->ch,CURLINFO_HTTP_CODE);
         //关闭 curl 句柄
         curl_close($this->ch);
         $this->ch = null;
         //200状态码
-        if($http_code == 200) {
-
+        if($this->http_code == 200) {
             //json格式
             if($this->dataType == 'json'){
                 //返回数组
                 return json_decode($content,true);
             }
-
             return $content;
         }else{
             return false;
