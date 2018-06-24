@@ -33,11 +33,6 @@ class HttpCurl{
     private $data = null;
 
 
-    /**
-     * @var bool 请求携带数据的扩展
-     */
-    private $dataParams = false;
-
 
 
 
@@ -250,20 +245,16 @@ class HttpCurl{
      * @author jackhe
      * @date 2018-06-21
      * @param array $data 请求携带的参数
-     * @param bool $params 请求携带的参数的额外参数、仅对 post方法有效
      * @return $this
      */
-    public function data($data = null,$params = false){
+    public function data($data = null){
 
         if(!empty($data)){
             $this->data = $data;
         }
-
-        if(!empty($params)){
-            $this->dataParams = $params;
-        }
         return $this;
     }
+
 
 
 
@@ -304,7 +295,7 @@ class HttpCurl{
     public function get($url,$data = null)
     {
         //设置 请求url
-        $this->url = $this->url($url);
+        $this->url($url);
         //设置 请求携带数据
         $this->data($data);
 
@@ -333,46 +324,18 @@ class HttpCurl{
      * @date 2018-06-21
      * @param string $url 请求的url
      * @param array $data 请求携带数据
-     * @param bool $params 是否将 @ 开头的数据进行上传
      * @return mixed
      */
-    public function post($url,$data = null,$params = false)
+    public function post($url,$data = null)
     {
         //设置 请求url
-        $this->url = $this->url($url);
+        $this->url($url);
         //设置 请求携带数据
         $this->data($data);
-        //设置 请求携带额外参数
-        $this->dataParams($params);
 
         curl_setopt($this->ch, CURLOPT_POST, 1);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1 );
-        // 设置post内容
-        if(!empty($this->data)) {
-            $data = array();
-            //判断需要检查上传文件
-            if($this->dataParams === true){
-                //判断是字符串 并且 存在
-                if(is_string($this->data) && (!empty($this->data))){
-                    $this->data = $this->data;
-                }else if(is_array($this->data) && (!empty($this->data))){//判断是数组 并且 存在
-                    foreach ($this->data as $key=>$data){
-                        if(strpos($data,'@') === 0){
-                            if(version_compare(PHP_VERSION,'5.5.0', '>=')){
-                                $data[$key] = new CURLFile(realpath($data));
-                            }else{
-                                $data[$key] = '@'.realpath($data);
-                            }
-                        }else{
-                            $data[$key] = $data;
-                        }
-                    }
-                }
-            }
-
-            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
-        }
-
+        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->data);
         //执行 http请求 并 返回响应内容
         return $this->httpRequest();
     }
@@ -392,7 +355,7 @@ class HttpCurl{
     public function upload($url,$data= null)
     {
         //设置 请求url
-        $this->url = $this->url($url);
+        $this->url($url);
         //设置 file路径数组
         $this->data($data);
 
@@ -409,15 +372,15 @@ class HttpCurl{
 
             //判断是数组 并且 存在
             if(is_array($this->data) && (!empty($this->data))){
-
-                foreach ($this->data as $key=>$data){
+                foreach ($this->data as $key=>$val){
                     if(version_compare(PHP_VERSION,'5.5.0', '>=')){
-                        $data[$key] = new CURLFile(realpath($data));
+                        $data[$key] = new CURLFile(realpath($val));
                     }else{
-                        $data[$key] = '@'.realpath($data);
+                        $data[$key] = '@'.realpath($val);
                     }
                 }
             }
+
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $data);
         }
 
@@ -493,44 +456,3 @@ class HttpCurl{
 
 
 }
-
-
-
-    //实例化 HttpCurl 类实例
-    //$HttpCurl = new \HttpCurl();
-
-    /*get 请求*/
-    /*
-    //使用 get 第二参数传递数据
-    $HttpCurl->get('http://www.baidu.com',array(1,2,4,5));
-    //使用 data 传递 数据
-    $HttpCurl->data(array(1,2,4,5))->get('http://www.baidu.com');
-    //使用 url 传递 url
-    $HttpCurl->url('http://www.baidu.com')->data(array(1,2,4,5))->get();
-    //使用 url 传递 url 并 使用 get方法第二参数传递数据
-    $HttpCurl->url('http://www.baidu.com')->get(null,array(1,2,4,5));
-    */
-
-    /*post 请求*/
-    /*
-    //使用 get 第二参数传递数据
-    $HttpCurl->post('http://www.baidu.com',array(1,2,4,5));
-    //使用 data 传递 数据
-    $HttpCurl->data(array(1,2,4,5))->post('http://www.baidu.com');
-    //使用 url 传递 url
-    $HttpCurl->url('http://www.baidu.com')->data(array(1,2,4,5))->post();
-    //使用 url 传递 url 并 使用 post方法第二参数传递数据
-    $HttpCurl->url('http://www.baidu.com')->post(null,array(1,2,4,5));
-    */
-
-    /*文件上传 请求、支持多个文件*/
-    /*
-    //使用 upload 第二参数传递文件名
-    $HttpCurl->upload('http://www.baidu.com',array('logo'=>'./logo.png'));
-    //使用 data 传递 数据
-    $HttpCurl->data(array('logo'=>'./logo.png'))->upload('http://www.baidu.com');
-    //使用 url 传递 url
-    $HttpCurl->url('http://www.baidu.com')->data(array('http://www.baidu.com'))->post();
-    //使用 url 传递 url 并 使用 upload方法第二参数传递数据
-    $HttpCurl->url('http://www.baidu.com')->upload(null,array('http://www.baidu.com'));
-    */
