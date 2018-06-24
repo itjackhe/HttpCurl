@@ -103,7 +103,10 @@ class HttpCurl{
      */
     public function __construct()
     {
-
+        //判断php版本、小于 5.3.0 提示用户更新
+        if(version_compare(PHP_VERSION,'5.3.0', '<')){
+            exit('<h1>Please upgrade PHP version to 5.3+</h1>');
+        }
     }
 
 
