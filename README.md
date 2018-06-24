@@ -1,5 +1,5 @@
 # HttpCurl
-HttpCurl工具类
+HttpCurl工具类  支持 get 、post 、文件上传、支持链式操作
 
     /*实例化 HttpCurl 工具类*/
     $HttpCurl = new HttpCurl();
