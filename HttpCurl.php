@@ -515,6 +515,7 @@ class HttpCurl{
         //关闭 curl 句柄
         curl_close($this->ch);
         $this->ch = null;
+        $this->data = null;
         //200状态码
         if($this->http_code == 200) {
             //json格式
