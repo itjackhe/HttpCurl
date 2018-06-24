@@ -15,16 +15,20 @@ class HttpCurl{
 
 
     /**
-     * @var int 超时秒数
+     * @var string 响应数据格式 text|json
      */
-    private $timeOut = 3;
-
+    private $dataType = 'text';
 
 
     /**
      * @var string 请求的url
      */
     private $url = '';
+
+    /**
+     * @var int 超时秒数
+     */
+    private $timeOut = 3;
 
 
     /**
@@ -33,13 +37,52 @@ class HttpCurl{
     private $data = null;
 
 
+    /**
+     * @var array http header
+     */
+    private $header = null;
+
+
+    /**
+     * @var string http userAgent
+     */
+    private $userAgent = null;
 
 
 
     /**
-     * @var string 响应数据格式 text|json
+     * @var string http proxy
      */
-    private $dataType = 'text';
+    private $proxy = null;
+
+
+    /**
+     * @var int http proxyPort
+     */
+    private $proxyPort = null;
+
+
+
+    /**
+     * @var int http 是否显示header信息
+     */
+    private $showHeader = 0;
+
+
+
+
+    /**
+     * @var string 来源页面地址
+     */
+    private $referer = null;
+
+
+
+
+    /**
+     * @var string 证书地址
+     */
+    private $cainfo = null;
 
 
 
@@ -52,7 +95,7 @@ class HttpCurl{
      */
     public function __construct()
     {
-        $this->ch = curl_init();
+
     }
 
 
@@ -68,9 +111,7 @@ class HttpCurl{
      * @return $this
      */
     public function header($header = null) {
-        if(is_array($header)){
-            curl_setopt($this->ch, CURLOPT_HTTPHEADER , $header);
-        }
+        $this->header = $header;
         return $this;
     }
 
@@ -88,10 +129,7 @@ class HttpCurl{
      */
     public function userAgent($agent = null)
     {
-        if(!empty($agent)) {
-            //设置模拟用户使用的浏览器
-            curl_setopt($this->ch, CURLOPT_USERAGENT, $agent);
-        }
+        $this->userAgent = $agent;
         return $this;
     }
 
@@ -125,15 +163,12 @@ class HttpCurl{
      * @access public
      * @author jackhe
      * @date 2018-06-21
-     * @param string $url 请求的url
-     * @param array $data 请求携带数据
+     * @param string $url 代理地址
      * @return $this
      */
     public function proxy($proxy)
     {
-        if($proxy){
-            curl_setopt ($this->ch, CURLOPT_PROXY, $proxy);
-        }
+        $this->proxy = $proxy;
         return $this;
     }
 
@@ -147,15 +182,12 @@ class HttpCurl{
      * @access public
      * @author jackhe
      * @date 2018-06-21
-     * @param string $url 请求的url
-     * @param array $data 请求携带数据
+     * @param int $port 代理端口
      * @return $this
      */
     public function proxyPort($port)
     {
-        if(is_int($port)) {
-            curl_setopt($this->ch, CURLOPT_PROXYPORT, $port);
-        }
+        $this->proxyPort = $port;
         return $this;
     }
 
@@ -169,13 +201,13 @@ class HttpCurl{
      * @access public
      * @author jackhe
      * @date 2018-06-21
-     * @param string $show 是否显示
+     * @param bool $show 是否显示
      * @return $this
      */
     public function showHeader($show = 0)
     {
         $show = $show == 1 || $show === true ? 1 : 0;
-        curl_setopt($this->ch, CURLOPT_HEADER, $show);
+        $this->showHeader = $show;
         return $this;
     }
 
@@ -188,16 +220,14 @@ class HttpCurl{
 
     /**
      * 设置来源页面地址
-     * @access private
+     * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $referer 来源地址
      * @return $this
      */
-    private function referer($referer = null){
-        if (!empty($referer)){
-            curl_setopt($this->ch, CURLOPT_REFERER , $referer);
-        }
+    public function referer($referer = null){
+        $this->referer = $referer;
         return $this;
     }
 
@@ -207,14 +237,14 @@ class HttpCurl{
 
     /**
      * 设置证书路径
-     * @access private
+     * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $path 证书路径
      * @return $this
      */
     public function cainfo($path) {
-        curl_setopt($this->ch, CURLOPT_CAINFO, $path);
+        $this->cainfo = $path;
         return $this;
     }
 
@@ -223,7 +253,7 @@ class HttpCurl{
 
     /**
      * 响应数据格式 text|json
-     * @access private
+     * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $type 响应数据格式
@@ -285,7 +315,7 @@ class HttpCurl{
 
     /**
      * get 请求方法
-     * @access private
+     * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $url 请求的url
@@ -298,7 +328,7 @@ class HttpCurl{
         $this->url($url);
         //设置 请求携带数据
         $this->data($data);
-
+        $this->ch = curl_init();
         //设置 get 参数
         if((!empty($this->data)) && is_array($this->data)){
             //判断 url 存在 ?
@@ -319,7 +349,7 @@ class HttpCurl{
 
     /**
      * post 请求方法
-     * @access private
+     * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $url 请求的url
@@ -332,7 +362,7 @@ class HttpCurl{
         $this->url($url);
         //设置 请求携带数据
         $this->data($data);
-
+        $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_POST, 1);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1 );
         curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->data);
@@ -345,7 +375,7 @@ class HttpCurl{
 
     /**
      * post 上传文件方法
-     * @access private
+     * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $url 请求的url
@@ -354,11 +384,12 @@ class HttpCurl{
      */
     public function upload($url,$data= null)
     {
+
         //设置 请求url
         $this->url($url);
         //设置 file路径数组
         $this->data($data);
-
+        $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_POST, 1);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1 );
 
@@ -403,6 +434,42 @@ class HttpCurl{
         //设置超时秒数
         curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeOut);
 
+        //http请求头
+        if(is_array($this->header)){
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER , $this->header);
+        }
+
+        //http头信息是否显示
+        if(is_array($this->header)){
+            curl_setopt($this->ch, CURLOPT_HEADER, $this->showHeader);
+        }
+
+        //用户代理
+        if($this->userAgent) {
+            //设置模拟用户使用的浏览器
+            curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
+        }
+
+        //代理地址
+        if($this->proxy){
+            curl_setopt ($this->ch, CURLOPT_PROXY, $this->proxy);
+        }
+
+        //代理端口
+        if(is_int($this->proxyPort)){
+            curl_setopt($this->ch, CURLOPT_PROXYPORT, $this->proxyPort);
+        }
+
+        //来源页面地址
+        if ($this->referer){
+            curl_setopt($this->ch, CURLOPT_REFERER , $this->referer);
+        }
+
+        //证书地址
+        if($this->cainfo){
+            curl_setopt($this->ch, CURLOPT_CAINFO, $this->cainfo);
+        }
+
         //处理 https
         if(stripos($this->url, 'https://') !== FALSE) {
             curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -420,7 +487,7 @@ class HttpCurl{
         $http_code = curl_getinfo($this->ch,CURLINFO_HTTP_CODE);
         //关闭 curl 句柄
         curl_close($this->ch);
-
+        $this->ch = null;
         //200状态码
         if($http_code == 200) {
 
@@ -437,22 +504,46 @@ class HttpCurl{
 
     }
 
-
-
-
-    /**
-     * 析构方法
-     * @access public
-     * @author jackhe
-     * @date 2018-06-21
-     * @return void
-     */
-    public function __destruct()
-    {
-        //关闭 curl 句柄
-        curl_close($this->ch);
-    }
-
-
-
 }
+
+    /*实例化 HttpCurl 工具类*/
+    //$HttpCurl = new HttpCurl();
+
+    /*get 请求*/
+/*
+    //使用 get 第二参数传递数据
+    $HttpCurl->get('http://www.baidu.com',array(1,2,4,5));
+    //使用 data 传递 数据
+    $HttpCurl->data(array(1,2,4,5))->get('http://www.baidu.com');
+    //使用 url 传递 url
+    $HttpCurl->url('http://www.baidu.com')->data(array(1,2,4,5))->get();
+    //使用 url 传递 url 并 使用 get方法第二参数传递数据
+    $HttpCurl->url('http://www.baidu.com')->get(null,array(1,2,4,5));
+*/
+
+
+    /*post 请求*/
+/*
+    //使用 get 第二参数传递数据
+    $HttpCurl->post('http://www.baidu.com',array(1,2,4,5));
+    //使用 data 传递 数据
+    $HttpCurl->data(array(1,2,4,5))->post('http://www.baidu.com');
+    //使用 url 传递 url
+    $HttpCurl->url('http://www.baidu.com')->data(array(1,2,4,5))->post();
+    //使用 url 传递 url 并 使用 post方法第二参数传递数据
+    $HttpCurl->url('http://www.baidu.com')->post(null,array(1,2,4,5));
+*/
+
+
+    /*文件上传 请求、支持多个文件*/
+/*
+    //使用 upload 第二参数传递文件名
+    $HttpCurl->upload('http://www.baidu.com',array('logo'=>'./logo.png'));
+    //使用 data 传递 数据
+    $HttpCurl->data(array('logo'=>'./logo.png'))->upload('http://www.baidu.com');
+    //使用 url 传递 url
+    $HttpCurl->url('http://www.baidu.com')->data(array('logo'=>'./logo.png'))->upload();
+    //使用 url 传递 url 并 使用 upload方法第二参数传递数据
+    $HttpCurl->url('http://www.baidu.com')->upload(null,array('logo'=>'./logo.png'));
+*/
+
