@@ -373,43 +373,16 @@ class HttpCurl{
 
 
 
-
     /**
      * post 请求方法
      * @access public
      * @author jackhe
      * @date 2018-06-21
      * @param string $url 请求的url
-     * @param array $data 请求携带数据
+     * @param array || string $data 数据
      * @return mixed
      */
-    public function post($url,$data = null)
-    {
-        //设置 请求url
-        $this->url($url);
-        //设置 请求携带数据
-        $this->data($data);
-        $this->ch = curl_init();
-        curl_setopt($this->ch, CURLOPT_POST, 1);
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->data);
-        //执行 http请求 并 返回响应内容
-        return $this->httpRequest();
-    }
-
-
-
-
-    /**
-     * post 上传文件方法
-     * @access public
-     * @author jackhe
-     * @date 2018-06-21
-     * @param string $url 请求的url
-     * @param array | string $data file路径数组
-     * @return mixed
-     */
-    public function upload($url,$data= null)
+    public function post($url,$data= null)
     {
 
         //设置 请求url
@@ -424,17 +397,21 @@ class HttpCurl{
         if(!empty($this->data)) {
             $data = array();
             //判断是字符串 并且 存在
-            if(is_string($this->data) && (!empty($this->data))){
-                $this->data = array('data'=>$this->data);
+            if(is_string($this->data)){
+                $data = $this->data;
             }
 
             //判断是数组 并且 存在
             if(is_array($this->data) && (!empty($this->data))){
                 foreach ($this->data as $key=>$val){
-                    if(version_compare(PHP_VERSION,'5.5.0', '>=')){
-                        $data[$key] = new CURLFile(realpath($val));
-                    }else{
-                        $data[$key] = '@'.realpath($val);
+
+                    if(stripos($val,'@') === 0){
+                        $val = trim($val,'@');
+                        if(version_compare(PHP_VERSION,'5.5.0', '>=')){
+                            $data[$key] = new CURLFile(realpath($val));
+                        }else{
+                            $data[$key] = '@'.realpath($val);
+                        }
                     }
                 }
             }
@@ -445,6 +422,7 @@ class HttpCurl{
         //执行 http请求 并 返回响应内容
         return $this->httpRequest();
     }
+
 
 
 

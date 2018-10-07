@@ -17,7 +17,6 @@ PHP语言，HttpCurl工具类，支持GET请求、POST请求、POST上传文件�
 12. getLastHttpCode() 获取最后一次请求的 http_code
 13. get() 模拟 GET 请求
 14. post() 模拟 POST 请求
-15. upload() 模拟文件上传
 
 ...
 
@@ -48,7 +47,7 @@ PHP语言，HttpCurl工具类，支持GET请求、POST请求、POST上传文件�
     /*  模拟上传文件请求  */
     //基础请求、
     //小提示：因为请求的url不一定会响应上传请求、测试需要放到可响应的地址
-    $result = $HttpCurl->upload('https://www.baidu.com',array('head_img'=>'./user.png'));
+    $result = $HttpCurl->post('https://www.baidu.com',array('head_img'=>'@./user.png'));
 
 
     /*  链式操作例子、以GET请求为例、允许多个同时使用  */
