@@ -2,6 +2,10 @@
 
 PHP语言，HttpCurl工具类，支持GET请求、POST请求、POST上传文件请求（兼容PHP5.5~7），支持链式操作。
 
+#注意：这个项目不再维护，因为有更好的代替方案、[传送门][https://github.com/ihexiang/requests]
+
+- PHP 技术交流群 65336588
+
 ### 类方法说明
 1. header() 设置 http header
 2. userAgent() 设置用户浏览器代理
